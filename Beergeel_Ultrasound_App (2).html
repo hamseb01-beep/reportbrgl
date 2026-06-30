@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beergeel OBG Clinic – Ultrasound Reporting</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', 'Georgia', serif;
+        }
+        body {
+            background: #e8edf4;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .app-wrapper {
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.10);
+            padding: 28px 32px 32px 32px;
+        }
+
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #eef3f9;
+        }
+        .serial-badge {
+            background: #1a3a5e;
+            color: white;
+            padding: 4px 22px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: 1.5px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .hint {
+            font-size: 13px;
+            color: #5a7a9a;
+            background: #eef4fc;
+            padding: 4px 18px;
+            border-radius: 40px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .btn {
+            background: #1a3a5e;
+            border: none;
+            color: white;
+            padding: 10px 26px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .btn:hover { background: #0f2a45; transform: scale(1.02); }
+        .btn-outline {
+            background: transparent;
+            color: #1a3a5e;
+            border: 1.5px solid #1a3a5e;
+        }
+        .btn-outline:hover { background: #e7effa; }
+        .btn-danger { background: #b03a2e; }
+        .btn-danger:hover { background: #8a2c22; }
+        .btn-success { background: #2d7d46; }
+        .btn-success:hover { background: #1f5f34; }
+        .btn-cloud { background: #e8637a; }
+        .btn-cloud:hover { background: #d14a62; }
+        .btn-cloud:disabled { background: #c9c9c9; cursor: not-allowed; transform: none; }
+
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #8198b3;
+            margin-left: 10px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .sync-status.saved { color: #2d7d46; }
+        .sync-status.saving { color: #c98a1a; }
+        .sync-status.error { color: #c23a52; }
+
+        .exam-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            background: #f5f9ff;
+            padding: 12px 24px;
+            border-radius: 40px;
+            margin-bottom: 14px;
+            border: 1px solid #dae3ef;
+            align-items: center;
+        }
+        .exam-selector label {
+            font-weight: 600;
+            color: #1a3a5e;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .exam-selector select {
+            border: 1px solid #bccde0;
+            border-radius: 40px;
+            padding: 6px 24px;
+            background: white;
+            font-weight: 500;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .badge {
+            background: #dce7f7;
+            padding: 3px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .g-p-lnmp {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            background: #f5f9ff;
+            padding: 10px 22px;
+            border-radius: 40px;
+            margin-bottom: 16px;
+            border: 1px solid #dae3ef;
+            align-items: center;
+        }
+        .g-p-lnmp label {
+            font-weight: 500;
+            color: #1a3457;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .g-p-lnmp input {
+            border: 1px solid #bccde0;
+            border-radius: 30px;
+            padding: 4px 14px;
+            width: 70px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .gest-age {
+            font-weight: 600;
+            color: #0b2b4f;
+            background: #dce7f7;
+            padding: 4px 22px;
+            border-radius: 40px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .hidden { display: none !important; }
+
+        .module {
+            background: #fafdff;
+            border-radius: 24px;
+            border: 1px solid #e3edf8;
+            padding: 18px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .module h3 {
+            font-size: 18px;
+            color: #1a3a5e;
+            border-left: 6px solid #1a3a5e;
+            padding-left: 14px;
+            margin-bottom: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 18px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .row label {
+            font-weight: 500;
+            color: #1f3f66;
+            min-width: 120px;
+            font-size: 14px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .row input, .row select, .row textarea {
+            border: 1px solid #d0ddee;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 14px;
+            background: white;
+            flex: 1 1 180px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .row textarea {
+            border-radius: 18px;
+            min-height: 50px;
+            resize: vertical;
+            flex-basis: 280px;
+        }
+        .row input:focus, .row select:focus, .row textarea:focus {
+            border-color: #1a3a5e;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26,58,94,0.10);
+        }
+        .twin-section {
+            border-left: 4px solid #5f86b5;
+            padding-left: 16px;
+            margin-top: 10px;
+        }
+
+        /* ===== REPORT PAPER ===== */
+        .report-paper {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #d0ddee;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+            margin-top: 20px;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+        .report-paper.preview-mode {
+            border: 3px solid #1a3a5e;
+            box-shadow: 0 0 0 5px rgba(26,58,94,0.10);
+        }
+
+        /* Wave header */
+        .rp-header-wave {
+            background: #0d2350;
+            position: relative;
+            padding: 28px 28px 0 28px;
+            min-height: 140px;
+        }
+        .rp-header-wave::after {
+            content: '';
+            display: block;
+            position: absolute;
+            bottom: -2px;
+            left: 0; right: 0;
+            height: 50px;
+            background: white;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+        /* Pink accent top-right */
+        .rp-pink-corner {
+            position: absolute;
+            top: 0; right: 0;
+            width: 120px; height: 80px;
+            background: #e8637a;
+            border-radius: 0 18px 0 100%;
+        }
+
+        /* Header inner layout */
+        .rp-header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+            padding-bottom: 28px;
+        }
+        .rp-logo-block {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .rp-logo-img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+        }
+        .rp-logo-divider {
+            width: 2px;
+            height: 70px;
+            background: rgba(255,255,255,0.35);
+        }
+        .rp-clinic-name-block {
+            color: white;
+        }
+        .rp-clinic-name-block h1 {
+            font-size: 36px;
+            font-weight: 900;
+            color: white;
+            line-height: 1;
+            margin-bottom: 2px;
+            font-family: 'Arial', sans-serif;
+        }
+        .rp-clinic-name-block .rp-sub {
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 0.3px;
+        }
+        .rp-clinic-name-block .rp-sub-small {
+            font-size: 13px;
+            color: #e8637a;
+            font-style: italic;
+            margin-top: 2px;
+        }
+        /* Pink decorative line under subtitle */
+        .rp-heart-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+        .rp-heart-line .rp-line {
+            height: 1.5px;
+            width: 60px;
+            background: #e8637a;
+        }
+        .rp-heart-line .rp-heart {
+            color: #e8637a;
+            font-size: 13px;
+        }
+
+        .rp-doctor-block {
+            color: white;
+            text-align: right;
+        }
+        .rp-doctor-block .rp-doc-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.3;
+        }
+        .rp-doctor-block .rp-doc-title {
+            font-size: 13px;
+            color: #ccd9ec;
+            line-height: 1.5;
+        }
+
+        /* Report title section */
+        .rp-title-section {
+            text-align: center;
+            padding: 20px 28px 0 28px;
+        }
+        .rp-report-title {
+            font-size: 26px;
+            font-weight: 900;
+            color: #0d2350;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-family: 'Arial', sans-serif;
+        }
+        .rp-title-heart-line {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 6px 0 16px 0;
+        }
+        .rp-title-heart-line .rp-line {
+            height: 1.5px;
+            width: 100px;
+            background: #0d2350;
+        }
+        .rp-title-heart-line .rp-heart {
+            color: #e8637a;
+            font-size: 14px;
+        }
+
+        /* Info fields */
+        .rp-info-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            padding: 0 28px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #0d2350;
+            padding-bottom: 14px;
+        }
+        .rp-info-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .rp-info-col:first-child {
+            border-right: 2px solid #0d2350;
+            padding-right: 20px;
+        }
+        .rp-info-col:last-child {
+            padding-left: 20px;
+        }
+        .rp-field {
+            display: flex;
+            align-items: baseline;
+            gap: 0;
+        }
+        .rp-field-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #0d2350;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            font-family: 'Arial', sans-serif;
+            text-transform: uppercase;
+        }
+        .rp-field input {
+            border: none;
+            border-bottom: 1.5px solid #0d2350;
+            background: transparent;
+            padding: 2px 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #0f2b4a;
+            flex: 1;
+            min-width: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        .rp-field input:focus {
+            outline: none;
+            border-bottom: 2px solid #e8637a;
+        }
+
+        /* Findings box */
+        .rp-findings-box {
+            margin: 0 28px 16px 28px;
+            border: 2px solid #0d2350;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .rp-box-label {
+            background: #0d2350;
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 7px 16px;
+            text-transform: uppercase;
+            font-family: 'Arial', sans-serif;
+            display: inline-block;
+        }
+        .rp-findings-box textarea {
+            width: 100%;
+            border: none;
+            padding: 14px 18px;
+            font-size: 15px;
+            min-height: 260px;
+            height: auto;
+            resize: none;
+            background: white;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.9;
+            color: #0f2b4a;
+            overflow: hidden;
+            display: block;
+        }
+        .rp-findings-box textarea:focus {
+            outline: none;
+        }
+
+        /* Impression box */
+        .rp-impression-box {
+            margin: 0 28px 18px 28px;
+            border: 2px solid #0d2350;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .rp-impression-box input {
+            width: 100%;
+            border: none;
+            padding: 14px 18px;
+            font-size: 15px;
+            min-height: 70px;
+            background: white;
+            font-family: 'Arial', sans-serif;
+            color: #0f2b4a;
+            display: block;
+        }
+        .rp-impression-box input:focus {
+            outline: none;
+        }
+
+        /* Signature row */
+        .rp-signature-row {
+            padding: 0 28px 14px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .rp-sig-field {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .rp-sig-field .rp-field-label {
+            font-size: 12px;
+        }
+        .rp-sig-field input {
+            border: none;
+            border-bottom: 1.5px solid #0d2350;
+            background: transparent;
+            padding: 2px 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #0f2b4a;
+            width: 200px;
+            font-family: 'Arial', sans-serif;
+        }
+        .rp-sig-field input:focus {
+            outline: none;
+            border-bottom: 2px solid #e8637a;
+        }
+
+        /* Wave footer */
+        .rp-footer-wave {
+            background: #0d2350;
+            position: relative;
+            margin-top: 10px;
+            padding: 30px 28px 22px 28px;
+        }
+        .rp-footer-wave::before {
+            content: '';
+            display: block;
+            position: absolute;
+            top: -2px; left: 0; right: 0;
+            height: 50px;
+            background: white;
+            border-radius: 0 0 50% 50% / 0 0 100% 100%;
+        }
+        /* Pink wave accent */
+        .rp-footer-pink {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 30px;
+            overflow: hidden;
+        }
+        .rp-footer-pink::after {
+            content: '';
+            display: block;
+            background: #e8637a;
+            height: 60px;
+            border-radius: 0 0 50% 50% / 0 0 80% 80%;
+            margin: 0 -10px;
+        }
+        .rp-footer-inner {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+            flex-wrap: wrap;
+        }
+        .rp-footer-left {
+            flex: 1;
+            color: white;
+            font-size: 13px;
+            line-height: 1.7;
+            font-family: 'Arial', sans-serif;
+        }
+        .rp-footer-left .rp-footer-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .rp-footer-icon {
+            width: 28px;
+            height: 28px;
+            background: #e8637a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .rp-footer-divider {
+            width: 1px;
+            background: rgba(255,255,255,0.25);
+            align-self: stretch;
+            margin: 0 10px;
+        }
+        .rp-footer-right {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: white;
+            font-size: 13px;
+            font-family: 'Arial', sans-serif;
+        }
+        .rp-footer-right .rp-footer-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rp-footer-right a {
+            color: white;
+            text-decoration: none;
+        }
+        .rp-qr {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .signature-line {
+            display: none; /* replaced by rp-signature-row */
+        }
+        .signature-line input {
+            border: none;
+            border-bottom: 2px solid #1a3a5e;
+            background: transparent;
+            font-weight: 600;
+            padding: 4px 14px;
+            width: 220px;
+            font-size: 16px;
+            font-family: 'Times New Roman', serif;
+            color: #0f2b4a;
+        }
+        .signature-line input:focus {
+            outline: none;
+            border-bottom: 3px solid #1a3a5e;
+        }
+        .signature-line .edit-hint-small {
+            font-weight: 400;
+            font-size: 13px;
+            color: #5a7a9a;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .clinic-footer { display: none; }
+
+        .preview-banner {
+            background: #1a3a5e;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            font-weight: 600;
+            display: none;
+            font-family: 'Segoe UI', sans-serif;
+            letter-spacing: 0.5px;
+        }
+        .preview-banner.show { display: block; }
+
+        .app-footer {
+            margin-top: 16px;
+            font-size: 13px;
+            color: #5a7a9a;
+            text-align: center;
+            border-top: 1px solid #eef3f9;
+            padding-top: 16px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .screenshot-flash {
+            animation: flash 0.5s ease;
+        }
+        @keyframes flash {
+            0% { box-shadow: 0 0 0 0 rgba(45, 125, 70, 0.6); }
+            50% { box-shadow: 0 0 0 8px rgba(45, 125, 70, 0.3); }
+            100% { box-shadow: 0 0 0 0 rgba(45, 125, 70, 0); }
+        }
+
+        /* ===== PDF MODE — REMOVES ALL BORDERS, NO SCROLLBAR ===== */
+        .pdf-mode .rp-findings-box textarea {
+            border: none !important;
+            background: white !important;
+            resize: none !important;
+            overflow: hidden !important;
+            height: auto !important;
+            min-height: auto !important;
+            box-shadow: none !important;
+        }
+        .pdf-mode .rp-impression-box input {
+            border: none !important;
+            background: white !important;
+        }
+        .pdf-mode .report-paper {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .pdf-mode .rp-field input {
+            border-bottom: 1px solid #0d2350 !important;
+        }
+        .pdf-mode .rp-sig-field input {
+            border-bottom: 2px solid #0d2350 !important;
+        }
+
+        @media (max-width: 700px) {
+            .app-wrapper { padding: 16px; }
+            .info-grid { grid-template-columns: 1fr; }
+            .clinic-footer { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .top-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+            .report-paper { padding: 20px; }
+            .findings-area textarea { min-height: 250px; }
+        }
+
+        /* ===== ROLE SWITCHER ===== */
+        .role-switcher {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            background: #eef3fa;
+            padding: 6px;
+            border-radius: 14px;
+            width: fit-content;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .role-btn {
+            border: none;
+            background: transparent;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #44607f;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+        }
+        .role-btn.active {
+            background: #0d2350;
+            color: white;
+            box-shadow: 0 3px 10px rgba(13,35,80,0.25);
+        }
+        .role-btn:hover:not(.active) {
+            background: #dde7f5;
+        }
+
+        .hidden-role { display: none !important; }
+
+        /* ===== LAB TECHNICIAN PANEL ===== */
+        .lab-panel {
+            background: #fbfcfe;
+            border: 2px solid #dce6f2;
+            border-radius: 18px;
+            padding: 22px 26px;
+            margin-bottom: 24px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .lab-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            color: #0d2350;
+        }
+        .lab-panel-header i {
+            font-size: 20px;
+            color: #e8637a;
+        }
+        .lab-panel-header h2 {
+            font-size: 19px;
+            font-weight: 800;
+            color: #0d2350;
+        }
+        .lab-lookup-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+        .lab-lookup-row .field {
+            flex: 1;
+            min-width: 200px;
+        }
+        .lab-lookup-row label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #44607f;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .lab-lookup-row input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid #cfdcec;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Segoe UI', sans-serif;
+            color: #0f2b4a;
+        }
+        .lab-lookup-row input:focus {
+            outline: none;
+            border-color: #0d2350;
+        }
+        .lab-patient-found {
+            background: #e9f6ee;
+            border: 1.5px solid #b9e4c6;
+            color: #1d6b3a;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .lab-patient-found.show { display: flex; }
+
+        .lab-search-results {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .lab-search-result-item {
+            background: white;
+            border: 1.5px solid #e2e9f2;
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .lab-search-result-item:hover {
+            border-color: #0d2350;
+            background: #f4f8fd;
+        }
+        .lab-search-result-item .lsr-main {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .lab-search-result-item .lsr-name {
+            font-weight: 700;
+            color: #0d2350;
+            font-size: 14px;
+        }
+        .lab-search-result-item .lsr-meta {
+            font-size: 12px;
+            color: #7c93ad;
+        }
+        .lab-search-result-item .lsr-select {
+            font-size: 12px;
+            font-weight: 700;
+            color: #e8637a;
+        }
+        .lab-search-empty {
+            font-size: 13px;
+            color: #8198b3;
+            font-style: italic;
+            padding: 6px 2px;
+        }
+
+        .investigation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .investigation-item {
+            background: white;
+            border: 1.5px solid #e2e9f2;
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+        .investigation-item-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .investigation-name-input {
+            flex: 1;
+            min-width: 160px;
+            border: none;
+            border-bottom: 1.5px solid #cfdcec;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 700;
+            color: #0d2350;
+            padding: 4px 2px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .investigation-name-input:focus { outline: none; border-bottom-color: #0d2350; }
+        .investigation-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .upload-btn {
+            background: #0d2350;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .upload-btn:hover { background: #163566; }
+        .remove-inv-btn {
+            background: #fbe9ec;
+            color: #c23a52;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .remove-inv-btn:hover { background: #f6d3da; }
+        .inv-photos-strip {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .inv-photo-thumb {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1.5px solid #dce6f2;
+        }
+        .inv-photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .inv-photo-thumb .remove-photo {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 20px;
+            height: 20px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-investigation-btn {
+            background: #eef3fa;
+            border: 1.5px dashed #aac0dc;
+            color: #44607f;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .add-investigation-btn:hover { background: #dde7f5; }
+
+        .lab-empty-hint {
+            font-size: 13px;
+            color: #8198b3;
+            font-style: italic;
+            padding: 10px 2px;
+        }
+
+        /* ===== LAB RESULTS REPORT BOX (mirrors report-paper styling) ===== */
+        .lab-report-box {
+            margin: 0 28px 18px 28px;
+            border: 2px solid #0d2350;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .lab-report-box .rp-box-label {
+            background: #e8637a;
+        }
+        .lab-report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+            padding: 16px 18px;
+        }
+        .lab-report-grid .lab-no-results {
+            grid-column: 1 / -1;
+            color: #8198b3;
+            font-style: italic;
+            font-size: 14px;
+            text-align: center;
+            padding: 18px 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .lab-report-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .lab-report-item .lab-report-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #0d2350;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-family: 'Arial', sans-serif;
+        }
+        .lab-report-item img {
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid #dce6f2;
+            display: block;
+        }
+
+        .lab-report-section {
+            display: none;
+        }
+        .lab-report-section.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper" id="appWrapper">
+
+    <div class="top-bar">
+        <div>
+            <span class="serial-badge" id="serialDisplay">000126</span>
+            <span class="hint"><i class="fas fa-sync-alt"></i> auto serial</span>
+            <span class="sync-status" id="syncStatus"><i class="fas fa-cloud"></i> Not saved</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-cloud" id="saveCloudBtn"><i class="fas fa-cloud-upload-alt"></i> Save to Cloud</button>
+            <button class="btn" id="previewBtn"><i class="fas fa-eye"></i> Preview</button>
+            <button class="btn btn-success" id="screenshotBtn"><i class="fas fa-camera"></i> Screenshot</button>
+            <button class="btn" id="pdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button class="btn btn-outline" id="editPriorBtn"><i class="fas fa-edit"></i> Load prior</button>
+        </div>
+    </div>
+
+    <div class="role-switcher">
+        <button class="role-btn active" id="roleDoctorBtn"><i class="fas fa-user-md"></i> Doctor</button>
+        <button class="role-btn" id="roleLabBtn"><i class="fas fa-flask"></i> Lab Technician</button>
+    </div>
+
+    <div class="lab-panel hidden-role" id="labPanel">
+        <div class="lab-panel-header">
+            <i class="fas fa-flask"></i>
+            <h2>Laboratory Technician — Attach Results</h2>
+        </div>
+
+        <div class="lab-lookup-row">
+            <div class="field">
+                <label>Patient Name or ID</label>
+                <input type="text" id="labSearchInput" placeholder="Search cloud records by name or patient ID...">
+            </div>
+            <div class="field" style="flex: 0 0 auto; align-self: flex-end;">
+                <button class="btn btn-cloud" id="labSearchBtn" type="button"><i class="fas fa-search"></i> Search</button>
+            </div>
+        </div>
+
+        <div class="lab-search-results" id="labSearchResults"></div>
+
+        <div class="lab-patient-found" id="labPatientFound">
+            <i class="fas fa-check-circle"></i> <span id="labPatientFoundText">Patient record linked.</span>
+        </div>
+
+        <div class="investigation-list" id="investigationList"></div>
+        <div class="lab-empty-hint" id="labEmptyHint">No investigations added yet. Add the tests requested by the doctor below.</div>
+
+        <button class="add-investigation-btn" id="addInvestigationBtn">
+            <i class="fas fa-plus"></i> Add Requested Investigation
+        </button>
+
+        <input type="file" id="hiddenPhotoInput" accept="image/*" multiple style="display:none;">
+    </div>
+
+    <div class="preview-banner" id="previewBanner">
+        <i class="fas fa-eye"></i> PREVIEW MODE — This is how your report will look when printed
+    </div>
+
+    <div id="doctorView">
+    <div class="exam-selector">
+        <label><i class="fas fa-stethoscope"></i> Examination Type</label>
+        <select id="examType">
+            <option value="pelvic">Pelvic Ultrasound</option>
+            <option value="first">Obstetric First Trimester</option>
+            <option value="second">Obstetric 2nd Trimester</option>
+            <option value="third">Obstetric 3rd Trimester</option>
+        </select>
+        <span class="badge" id="examTypeLabel">Pelvic</span>
+    </div>
+
+    <div class="g-p-lnmp hidden" id="obstetricFields">
+        <label>G <input type="number" id="gravidity" min="0" value="2"></label>
+        <label>P <input type="number" id="parity" min="0" value="1"></label>
+        <label>LNMP <input type="date" id="lnmpDate"></label>
+        <label>Unknown <input type="checkbox" id="lnmpUnknown"></label>
+        <span class="gest-age" id="gestationalAgeDisplay">GA: -- w -- d</span>
+    </div>
+
+    <!-- PELVIC MODULE -->
+    <div id="pelvicModule" class="module">
+        <h3><i class="fas fa-uterus"></i> Pelvic Ultrasound</h3>
+        <div class="row"><label>Uterus</label><textarea id="uterusText">Normal in size and position. Dimensions within normal limits. The myometrial echotexture is smooth and homogeneous throughout, with no evidence of discrete intramural, subserosal, or submucosal fibroids. No focal myometrial lesion is identified.</textarea></div>
+        <div class="row"><label>Endometrium</label><textarea id="endometriumText">The endometrial stripe is central, homogeneous, and well enclosed by a distinct halo. It measures within normal clinical limits for the patient's menstrual cycle phase. No endometrial polyp or thickening identified.</textarea></div>
+        <div class="row"><label>Cervix</label><textarea id="cervixText">Normal in length and parenchymal appearance. No cystic or solid endocervical masses are seen. The internal and external os are closed. Cervical canal is unremarkable.</textarea></div>
+        <div class="row"><label>Right Ovary</label><textarea id="ovaryText">Located in the normal anatomical position. Normal in size and volume. Normal ovarian stroma with normal symmetric follicular pattern. No abnormal solid or complex cystic lesions identified. No evidence of torsion.</textarea></div>
+        <div class="row"><label>Pouch of Douglas</label><textarea id="podText">No free fluid.</textarea></div>
+    </div>
+
+    <!-- FIRST TRIMESTER MODULE -->
+    <div id="firstModule" class="module hidden">
+        <h3><i class="fas fa-baby"></i> First Trimester Obstetric</h3>
+        <div class="row"><label>Pregnancy</label><select id="firstPregnancyType"><option value="single">Single intrauterine</option><option value="twin">Twin intrauterine</option></select></div>
+        <div class="row"><label>Gestational sac</label><input type="text" id="gsFindings" value="Single intrauterine gestational sac"></div>
+        <div class="row"><label>GS diameter (mm)</label><input type="number" id="gsDiameter" step="0.1" value="20"></div>
+        <div class="row"><label>Yolk sac</label><input type="text" id="yolkSac" value="Visualized, normal appearance"></div>
+        <div class="row"><label>Embryo/Fetal pole</label><input type="text" id="fetalPole" value="Present, appropriate size"></div>
+        <div class="row"><label>FHR</label><select id="fhrFirst"><option value="Positive">Positive</option><option value="Negative">Negative</option></select></div>
+        <div class="row"><label>GA by</label><select id="gaBy"><option value="CRL">CRL</option><option value="GS">GS</option></select></div>
+        <div class="row"><label>GA (weeks+days)</label><input type="text" id="gaFirst" placeholder="e.g. 4+5"></div>
+        <div class="row"><label>Adnexa</label><input type="text" id="adnexaFirst" value="No adnexal pathology"></div>
+        <div class="row"><label>Cul-de-sac</label><input type="text" id="culdesacFirst" value="No significant free fluid"></div>
+        <div class="row"><label>Conclusion</label><input type="text" id="conclusionFirst" value="Normal first trimester ultrasound"></div>
+    </div>
+
+    <!-- SECOND / THIRD TRIMESTER MODULE -->
+    <div id="secondThirdModule" class="module hidden">
+        <h3><i class="fas fa-fetus"></i> <span id="trimesterLabel">Second</span> Trimester Obstetric</h3>
+        <div class="row"><label>Pregnancy</label><select id="pregnancyType"><option value="single">Single intrauterine</option><option value="twin">Twin intrauterine</option></select></div>
+        <div class="row"><label>Presentation</label><select id="presentation"><option value="cephalic">Cephalic</option><option value="breech">Breech</option><option value="transverse">Transverse</option><option value="oblique">Oblique</option></select></div>
+        <div class="row"><label>GA (weeks+days)</label><input type="text" id="gaSecond" placeholder="e.g. 28+3"></div>
+        <div class="row"><label>GA by</label><select id="gaBySecond"><option value="FL/BPD">FL/BPD</option><option value="average">Average gestational age</option></select></div>
+        <div class="row"><label>FHR</label><select id="fhr"><option value="Positive">Positive</option><option value="Negative">Negative</option></select></div>
+        <div class="row"><label>Anomalies</label><input type="text" id="anomalies" value="No gross anatomic anomalies"></div>
+        <div class="row"><label>Placenta</label><select id="placentaLocation"><option value="fundal">Fundal</option><option value="posterior">Posterior</option><option value="anterior">Anterior not low lying</option><option value="anteriorLow">Anterior low lying</option><option value="posteriorLow">Posterior low lying</option><option value="covering">Covering the cervical os (true placenta previa)</option><option value="bulky">Bulky anterior/posterior</option></select></div>
+        <div class="row hidden" id="lowLyingCmRow"><label>cm from cervical os</label><input type="number" id="lowLyingCm" step="0.1" value="2.0"></div>
+        <div class="row"><label>AFI/SDP</label><select id="afiSdp"><option value="AFI">AFI</option><option value="SDP">SDP</option></select> <input type="number" id="afiSdpValue" step="0.1" value="12"></div>
+        <div class="row"><label>FL/AC (%)</label><input type="number" id="flac" step="0.1" value="70"></div>
+        <div class="row"><label>EFW (g/kg)</label><input type="text" id="efw" value="2500 g"></div>
+        <div class="row"><label>Doppler</label><select id="dopplerSelect"><option value="Normal">Normal doppler</option><option value="Raised">Raised doppler</option><option value="Absent">Absent doppler</option><option value="Reversed">Reversed doppler</option></select></div>
+        <div class="row"><label>MCA PI</label><input type="text" id="mcaPi" placeholder="PI"> <label>RI</label><input type="text" id="mcaRi" placeholder="RI"></div>
+        <div class="row"><label>Anatomic scan</label><select id="anatomicScan"><option value="normal">Normal (no gross anomalies)</option><option value="abnormal">Abnormal</option></select></div>
+        <div class="row hidden" id="abnormalAnatomicRow"><label>Abnormality details</label><input type="text" id="abnormalAnatomicText" placeholder="Describe abnormality"></div>
+        <div id="bppSection" class="hidden">
+            <div class="row"><label>BPP - Fetal tone</label><select id="bppTone"><option value="2">Seen (2)</option><option value="0">Not seen (0)</option></select></div>
+            <div class="row"><label>BPP - Breathing</label><select id="bppBreath"><option value="2">Seen (2)</option><option value="0">Not seen (0)</option></select></div>
+            <div class="row"><label>BPP - Body movement</label><select id="bppMovement"><option value="2">Seen (2)</option><option value="0">Not seen (0)</option></select></div>
+            <div class="row"><label>SDP ≥ 2 cm</label><select id="bppSdp"><option value="2">Yes (2)</option><option value="0">No (0)</option></select></div>
+            <div class="row"><label>Total BPP score</label><span id="bppTotal">8/8</span></div>
+        </div>
+        <div class="row"><label>Conclusion</label><input type="text" id="conclusionSecond" value="Normal 2nd trimester pregnancy"></div>
+    </div>
+
+    <!-- TWIN SECTION -->
+    <div id="twinSection" class="module hidden">
+        <h3><i class="fas fa-baby"></i> Twin Pregnancy</h3>
+        <div class="row"><label>Placenta</label><select id="twinPlacenta"><option value="single">Single</option><option value="separated">Two separated</option></select></div>
+        <div class="row"><label>Dividing membrane</label><select id="dividingMembrane"><option value="seen">Seen</option><option value="not seen">Not seen</option></select></div>
+        <div class="row"><label>Delta / T-sign</label><select id="deltaSign"><option value="delta">Delta sign</option><option value="t">T-sign</option><option value="none">None</option></select></div>
+        <div class="row"><label>Chorionicity</label><select id="chorionicity"><option value="DCDA">DCDA</option><option value="MCMA">MCMA</option><option value="MCDA">MCDA</option></select></div>
+        <div class="twin-section"><h4>Twin A</h4><div class="row"><label>Findings</label><input type="text" id="twinA" value="Normal twin A"></div></div>
+        <div class="twin-section"><h4>Twin B</h4><div class="row"><label>Findings</label><input type="text" id="twinB" value="Normal twin B"></div></div>
+    </div>
+
+    <!-- ===== REPORT PAPER ===== -->
+    <div class="report-paper" id="reportPaper">
+
+        <!-- HEADER WAVE -->
+        <div class="rp-header-wave">
+            <div class="rp-pink-corner"></div>
+            <div class="rp-header-inner">
+                <!-- Logo + Clinic Name -->
+                <div class="rp-logo-block">
+                    <img class="rp-logo-img" src="https://i.ibb.co/pjY4hhVT/logo-beergeel.png" alt="Beergeel Logo" onerror="this.style.display='none'">
+                    <div class="rp-logo-divider"></div>
+                    <div class="rp-clinic-name-block">
+                        <h1>Beergeel</h1>
+                        <div class="rp-sub">Obstetrics and Gynecology Clinic</div>
+                        <div class="rp-sub-small">Takhasusuka sare ee xanuunada dumarka</div>
+                        <div class="rp-heart-line">
+                            <div class="rp-line"></div>
+                            <span class="rp-heart">&#9825;</span>
+                            <div class="rp-line"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Doctor Info -->
+                <div class="rp-doctor-block">
+                    <div class="rp-doc-name">Dr. Khalid H. Beergeel, MD</div>
+                    <div class="rp-doc-title">Consultant Obstetrician<br>and Gynecologist</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT TITLE -->
+        <div class="rp-title-section">
+            <div class="rp-report-title">ULTRASOUND REPORT</div>
+            <div class="rp-title-heart-line">
+                <div class="rp-line"></div>
+                <span class="rp-heart">&#9825;</span>
+                <div class="rp-line"></div>
+            </div>
+        </div>
+
+        <!-- INFO FIELDS -->
+        <div class="rp-info-section">
+            <div class="rp-info-col">
+                <div class="rp-field">
+                    <span class="rp-field-label">DATE:&nbsp;</span>
+                    <input type="date" id="reportDate" value="2026-06-24">
+                </div>
+                <div class="rp-field">
+                    <span class="rp-field-label">PATIENT NAME:&nbsp;</span>
+                    <input type="text" id="patientName" placeholder="">
+                </div>
+                <div class="rp-field">
+                    <span class="rp-field-label">AGE:&nbsp;</span>
+                    <input type="text" id="patientAge" placeholder="">
+                </div>
+                <div class="rp-field">
+                    <span class="rp-field-label">REFERRING DOCTOR:&nbsp;</span>
+                    <input type="text" id="referringDoctor" placeholder="">
+                </div>
+            </div>
+            <div class="rp-info-col">
+                <div class="rp-field">
+                    <span class="rp-field-label">PATIENT ID:&nbsp;</span>
+                    <input type="text" id="patientId" placeholder="">
+                </div>
+                <div class="rp-field">
+                    <span class="rp-field-label">LMP:&nbsp;</span>
+                    <input type="text" id="lmpDisplay" placeholder="">
+                </div>
+                <div class="rp-field">
+                    <span class="rp-field-label">CLINICAL INDICATION:&nbsp;</span>
+                    <input type="text" id="clinicalIndication" placeholder="">
+                </div>
+            </div>
+        </div>
+
+        <!-- FINDINGS BOX -->
+        <div class="rp-findings-box">
+            <div class="rp-box-label">ULTRASOUND FINDINGS:</div>
+            <textarea id="findingsText" placeholder="Enter findings..."></textarea>
+        </div>
+
+        <!-- IMPRESSION BOX -->
+        <div class="rp-impression-box">
+            <div class="rp-box-label">IMPRESSION:</div>
+            <input type="text" id="impressionText" placeholder="Enter impression...">
+        </div>
+
+        <!-- SIGNATURE ROW -->
+        <div class="rp-signature-row">
+            <div class="rp-sig-field">
+                <span class="rp-field-label">SONOLOGIST / DOCTOR:&nbsp;</span>
+                <input type="text" id="signatureText" placeholder="Dr. Khalid H. Beergeel" value="Dr. Khalid H. Beergeel">
+            </div>
+            <div class="rp-sig-field">
+                <span class="rp-field-label">SIGNATURE:&nbsp;</span>
+                <input type="text" id="signatureSign" placeholder="">
+            </div>
+        </div>
+
+        <!-- LAB RESULTS BOX (shows attached investigation photos, only if any exist) -->
+        <div class="lab-report-box lab-report-section" id="labReportSection">
+            <div class="rp-box-label"><i class="fas fa-flask"></i>&nbsp; LABORATORY RESULTS:</div>
+            <div class="lab-report-grid" id="labReportGrid"></div>
+        </div>
+
+        <!-- FOOTER WAVE -->
+        <div class="rp-footer-wave">
+            <div class="rp-footer-pink"></div>
+            <div class="rp-footer-inner">
+                <div class="rp-footer-left">
+                    <div class="rp-footer-item">
+                        <div class="rp-footer-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <span>Xero awr kasoo horjeedka Ayuub Restaurant,<br>inyar ka xiga dhanka Masjid Nuur</span>
+                    </div>
+                    <div class="rp-footer-item" style="margin-top:8px;">
+                        <div class="rp-footer-icon"><i class="fas fa-phone-alt"></i></div>
+                        <span><strong>0634026635</strong> (Mobile/WhatsApp)</span>
+                    </div>
+                    <div class="rp-footer-item">
+                        <div class="rp-footer-icon"><i class="fas fa-phone"></i></div>
+                        <span><strong>510066</strong></span>
+                    </div>
+                </div>
+                <div class="rp-footer-divider"></div>
+                <div class="rp-footer-right">
+                    <div class="rp-footer-item">
+                        <div class="rp-footer-icon"><i class="fas fa-envelope"></i></div>
+                        <span>beergeelobgyclinic@gmail.com</span>
+                    </div>
+                    <div class="rp-footer-item">
+                        <div class="rp-footer-icon"><i class="fas fa-globe"></i></div>
+                        <a href="https://beergeelclinic.com/" target="_blank">https://beergeelclinic.com/</a>
+                    </div>
+                </div>
+                <div class="rp-qr">
+                    <img src="data:image/png;base64,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ZsadOZMzr6MDno0CRKRRgIg0ChCZW8VUdzQZVV3bOhtnMum57owSM+POnMmZ19GB0VVMdR+TUdW1rbNxJpOe684oMTPuzJmceR19RxUTQMSzUYDInauYZo6qq16orueuUc2Me2zmKtS17er5YretYpo5qroz6uq5a1Qz4x6buQp1bbt6vt49q5hmjqrujLp67hrVzLjHZq5CXduunlt4NgoQkUYBItIoQOSeVUwzR1V3Rl09d41qZtxjM1ehrm1Xzy1uW8U0c1R1Z9TVc9eoZsY9NnMV6tp29Xw9VUwAEc9GASL9VUxdZtb8JD13HU3MjNvVs/U9f3SUh96Nzqz5SXru+piYGberZ+t7/uM0T0yjM2t+kp67jiZmxu3q2fp+XDKqIp6NAkSkUYCINAoQeWIanVnzk/TcdTQxM25Xz9b345JRFXno3ejMmp+k566PiZlxu3q2vuc/TqOKCSDi2ShAZHoVU1dNSFfPM+MemznP91v9xMy5StqOmufRd6NdNSFdPc+Me2zmPN9v9RMz5yppO22e56bRrpqQrp5nxj02c57vt/qJmXOVtB04z56NAkSkUYCINAoQmZtGu2pCunqeGffYzHm+3+onZs5V0nbgPI++G+2qCenqeWbcYzPn+X6rn5g5V0nbafOsigkg4tkoQKS/ikktyjVxu87ofrrWaOOOfch+br4bVYtyTdyuM7qfrjXauGOfs58706halP8McUEFFOd1rdHGHfuo/ezZKEBEGgWISKMAkc40qhblP0NcUAHFeV1rtHHHPmo/N9+NqkW5Ju60qo+9utZo4459zn5WxQQQ8WwUIOK3mK4+2mXjmP9W/XrgmXOfuScTG68UVUxnddUp1X3ssnHMM83ck4mNV4oqprO66pTqjnbZOOaZZu7JxMYrRRUTwN1MfzYKV95obHlGzCjuRgEifovpuqNdNo55ppl7MrHxSlHF9DNddUp1H7tsHPNMM/dkYuOVoooJfua7Z6O/b92K56cuDU7ybBQgsvu3mOri1knONxmz76CvMXMF63bdzFFdbPFvMdXFraPq495mrmDdrps5qut1Phs9fuZ15olYRdw6yfkmY+4633fpukiSe6u/++lawbpdN3NULTwbBYhIowARaRQgsvW3mOri1knONxlz1/k+zcwVrNt1M0fVYvFvMdXFrZOcbzLmrvN9mpkrWLfrZo7q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" width="80" height="80" alt="QR" style="display:block;">
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </div><!-- /doctorView -->
+
+    <div class="app-footer">
+        <i class="fas fa-print"></i> Beergeel OBG Clinic – Ultrasound Reporting System
+    </div>
+</div>
+
+<script>
+    (function() {
+        let usCounter = 0;
+        function generateSerial() {
+            const now = new Date();
+            const month = String(now.getMonth()+1).padStart(2, '0');
+            const year = String(now.getFullYear()).slice(2);
+            const counterPart = String(usCounter).padStart(2, '0');
+            usCounter = (usCounter + 1) % 100;
+            return counterPart + month + year;
+        }
+        document.getElementById('serialDisplay').textContent = generateSerial();
+
+        const examType = document.getElementById('examType');
+        const pelvicMod = document.getElementById('pelvicModule');
+        const firstMod = document.getElementById('firstModule');
+        const secondMod = document.getElementById('secondThirdModule');
+        const twinSec = document.getElementById('twinSection');
+        const obstetricFields = document.getElementById('obstetricFields');
+        const examTypeLabel = document.getElementById('examTypeLabel');
+        const bppSection = document.getElementById('bppSection');
+        const trimesterLabel = document.getElementById('trimesterLabel');
+        const previewBanner = document.getElementById('previewBanner');
+        const reportPaper = document.getElementById('reportPaper');
+        const findingsText = document.getElementById('findingsText');
+        const impressionText = document.getElementById('impressionText');
+
+        function autoResizeTextarea() {
+            findingsText.style.height = 'auto';
+            findingsText.style.height = findingsText.scrollHeight + 'px';
+        }
+
+        function buildFindings() {
+            const val = examType.value;
+            let findings = '';
+            let impression = '';
+
+            if (val === 'pelvic') {
+                findings = `Uterus: ${document.getElementById('uterusText').value}\n\n`;
+                findings += `Endometrium: ${document.getElementById('endometriumText').value}\n\n`;
+                findings += `Cervix: ${document.getElementById('cervixText').value}\n\n`;
+                findings += `Right Ovary: ${document.getElementById('ovaryText').value}\n\n`;
+                findings += `Pouch of Douglas: ${document.getElementById('podText').value}`;
+                impression = 'Normal pelvic ultrasound.';
+            } else if (val === 'first') {
+                const pregType = document.getElementById('firstPregnancyType').value;
+                const fhr = document.getElementById('fhrFirst').value;
+                const ga = document.getElementById('gaFirst').value || '___';
+                const gaBy = document.getElementById('gaBy').value;
+                const gs = document.getElementById('gsFindings').value;
+                const gsDiam = document.getElementById('gsDiameter').value;
+                const yolk = document.getElementById('yolkSac').value;
+                const fetal = document.getElementById('fetalPole').value;
+                const adnexa = document.getElementById('adnexaFirst').value;
+                const culdesac = document.getElementById('culdesacFirst').value;
+                
+                findings = `${pregType} pregnancy.\n`;
+                findings += `Gestational sac: ${gs} (${gsDiam} mm)\n`;
+                findings += `Yolk sac: ${yolk}\n`;
+                findings += `Embryo/Fetal pole: ${fetal}\n`;
+                findings += `FHR: ${fhr}\n`;
+                findings += `Gestational age: ${ga} by ${gaBy}\n`;
+                findings += `Adnexa: ${adnexa}\n`;
+                findings += `Cul-de-sac: ${culdesac}`;
+                impression = document.getElementById('conclusionFirst').value || 'Normal first trimester ultrasound.';
+            } else if (val === 'second' || val === 'third') {
+                const pregType = document.getElementById('pregnancyType').value;
+                const presentation = document.getElementById('presentation').value;
+                const ga = document.getElementById('gaSecond').value || '___';
+                const gaBy = document.getElementById('gaBySecond').value;
+                const fhr = document.getElementById('fhr').value;
+                const anomalies = document.getElementById('anomalies').value;
+                let placenta = document.getElementById('placentaLocation').value;
+                const lowCm = document.getElementById('lowLyingCm').value;
+                if (placenta === 'anteriorLow') placenta = `Anterior low lying (${lowCm} cm from cervical os)`;
+                else if (placenta === 'posteriorLow') placenta = `Posterior low lying (${lowCm} cm from cervical os)`;
+                else if (placenta === 'covering') placenta = 'Covering the cervical os (true placenta previa)';
+                else if (placenta === 'bulky') placenta = 'Bulky anterior/posterior';
+                const afiSdp = document.getElementById('afiSdp').value;
+                const afiVal = document.getElementById('afiSdpValue').value;
+                const flac = document.getElementById('flac').value;
+                const efw = document.getElementById('efw').value;
+                const doppler = document.getElementById('dopplerSelect').value;
+                const mcaPi = document.getElementById('mcaPi').value;
+                const mcaRi = document.getElementById('mcaRi').value;
+                const anatScan = document.getElementById('anatomicScan').value;
+                let anatText = '';
+                if (anatScan === 'abnormal') {
+                    anatText = ` (Abnormal: ${document.getElementById('abnormalAnatomicText').value})`;
+                }
+
+                findings = `${pregType} pregnancy.\n`;
+                findings += `Presentation: ${presentation}\n`;
+                findings += `Gestational age: ${ga} by ${gaBy}\n`;
+                findings += `FHR: ${fhr}\n`;
+                findings += `Anomalies: ${anomalies}${anatText}\n`;
+                findings += `Placenta: ${placenta}\n`;
+                findings += `${afiSdp}: ${afiVal} cm\n`;
+                findings += `FL/AC ratio: ${flac}%\n`;
+                findings += `EFW: ${efw}\n`;
+                findings += `Doppler: ${doppler}`;
+                if (mcaPi || mcaRi) {
+                    findings += ` (MCA PI: ${mcaPi || '___'}, RI: ${mcaRi || '___'})`;
+                }
+
+                if (val === 'third') {
+                    const tone = document.getElementById('bppTone').value;
+                    const breath = document.getElementById('bppBreath').value;
+                    const movement = document.getElementById('bppMovement').value;
+                    const sdp = document.getElementById('bppSdp').value;
+                    const total = parseInt(tone) + parseInt(breath) + parseInt(movement) + parseInt(sdp);
+                    findings += `\nBPP: Tone ${tone}/2, Breathing ${breath}/2, Movement ${movement}/2, SDP ${sdp}/2 = ${total}/8`;
+                }
+
+                if (document.getElementById('pregnancyType').value === 'twin') {
+                    findings += `\n\nTwin details:\n`;
+                    findings += `Placenta: ${document.getElementById('twinPlacenta').value}\n`;
+                    findings += `Dividing membrane: ${document.getElementById('dividingMembrane').value}\n`;
+                    findings += `Delta/T-sign: ${document.getElementById('deltaSign').value}\n`;
+                    findings += `Chorionicity: ${document.getElementById('chorionicity').value}\n`;
+                    findings += `Twin A: ${document.getElementById('twinA').value}\n`;
+                    findings += `Twin B: ${document.getElementById('twinB').value}`;
+                }
+
+                impression = document.getElementById('conclusionSecond').value || `Normal ${trimesterLabel.textContent} trimester pregnancy.`;
+            }
+
+            findingsText.value = findings;
+            impressionText.value = impression;
+            autoResizeTextarea();
+        }
+
+        findingsText.addEventListener('input', autoResizeTextarea);
+
+        document.querySelectorAll('input, select, textarea').forEach(el => {
+            el.addEventListener('change', buildFindings);
+            el.addEventListener('input', buildFindings);
+        });
+
+        function updateModules() {
+            const val = examType.value;
+            pelvicMod.classList.add('hidden');
+            firstMod.classList.add('hidden');
+            secondMod.classList.add('hidden');
+            twinSec.classList.add('hidden');
+            bppSection.classList.add('hidden');
+
+            if (val === 'pelvic') {
+                obstetricFields.classList.add('hidden');
+                pelvicMod.classList.remove('hidden');
+                examTypeLabel.textContent = 'Pelvic';
+            } else if (val === 'first') {
+                obstetricFields.classList.remove('hidden');
+                firstMod.classList.remove('hidden');
+                examTypeLabel.textContent = 'First Trimester';
+            } else if (val === 'second') {
+                obstetricFields.classList.remove('hidden');
+                secondMod.classList.remove('hidden');
+                trimesterLabel.textContent = 'Second';
+                examTypeLabel.textContent = '2nd Trimester';
+            } else if (val === 'third') {
+                obstetricFields.classList.remove('hidden');
+                secondMod.classList.remove('hidden');
+                trimesterLabel.textContent = 'Third';
+                bppSection.classList.remove('hidden');
+                examTypeLabel.textContent = '3rd Trimester';
+            }
+
+            const pregType = document.getElementById('pregnancyType').value;
+            if (pregType === 'twin' && (val === 'second' || val === 'third')) {
+                twinSec.classList.remove('hidden');
+            } else {
+                twinSec.classList.add('hidden');
+            }
+
+            const placenta = document.getElementById('placentaLocation').value;
+            document.getElementById('lowLyingCmRow').classList.toggle('hidden', placenta !== 'anteriorLow' && placenta !== 'posteriorLow');
+            
+            const anat = document.getElementById('anatomicScan').value;
+            document.getElementById('abnormalAnatomicRow').classList.toggle('hidden', anat !== 'abnormal');
+            
+            buildFindings();
+        }
+
+        examType.addEventListener('change', updateModules);
+        document.getElementById('pregnancyType').addEventListener('change', updateModules);
+        document.getElementById('placentaLocation').addEventListener('change', updateModules);
+        document.getElementById('anatomicScan').addEventListener('change', updateModules);
+        updateModules();
+
+        const lnmpDate = document.getElementById('lnmpDate');
+        const lnmpUnknown = document.getElementById('lnmpUnknown');
+        const gestAgeDisplay = document.getElementById('gestationalAgeDisplay');
+
+        function updateGA() {
+            if (lnmpUnknown.checked) { 
+                gestAgeDisplay.textContent = 'GA: unknown'; 
+                document.getElementById('lmpDisplay').value = 'Unknown';
+                return; 
+            }
+            const val = lnmpDate.value;
+            if (val) {
+                // Show formatted date in report
+                const lmpFormatted = new Date(val + 'T00:00:00').toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+                document.getElementById('lmpDisplay').value = lmpFormatted;
+                const now = new Date();
+                const lnmp = new Date(val);
+                const diff = now - lnmp;
+                const days = Math.floor(diff / (1000*60*60*24));
+                if (days > 0) {
+                    const weeks = Math.floor(days / 7);
+                    const rem = days % 7;
+                    gestAgeDisplay.textContent = `GA: ${weeks} w ${rem} d`;
+                } else { gestAgeDisplay.textContent = 'GA: -- w -- d'; }
+            } else { 
+                gestAgeDisplay.textContent = 'GA: -- w -- d'; 
+                document.getElementById('lmpDisplay').value = '';
+            }
+        }
+        lnmpDate.addEventListener('change', updateGA);
+        lnmpUnknown.addEventListener('change', function() {
+            if (this.checked) { gestAgeDisplay.textContent = 'GA: unknown'; } 
+            else { updateGA(); }
+        });
+        updateGA();
+
+        function calcBPP() {
+            const tone = parseInt(document.getElementById('bppTone').value) || 0;
+            const breath = parseInt(document.getElementById('bppBreath').value) || 0;
+            const movement = parseInt(document.getElementById('bppMovement').value) || 0;
+            const sdp = parseInt(document.getElementById('bppSdp').value) || 0;
+            const total = tone+breath+movement+sdp;
+            document.getElementById('bppTotal').textContent = total + '/8';
+            buildFindings();
+        }
+        document.getElementById('bppTone').addEventListener('change', calcBPP);
+        document.getElementById('bppBreath').addEventListener('change', calcBPP);
+        document.getElementById('bppMovement').addEventListener('change', calcBPP);
+        document.getElementById('bppSdp').addEventListener('change', calcBPP);
+
+        let previewActive = false;
+        document.getElementById('previewBtn').addEventListener('click', function() {
+            previewActive = !previewActive;
+            if (previewActive) {
+                previewBanner.classList.add('show');
+                reportPaper.classList.add('preview-mode');
+                this.innerHTML = '<i class="fas fa-times"></i> Close Preview';
+                this.classList.add('btn-danger');
+                buildFindings();
+            } else {
+                previewBanner.classList.remove('show');
+                reportPaper.classList.remove('preview-mode');
+                this.innerHTML = '<i class="fas fa-eye"></i> Preview';
+                this.classList.remove('btn-danger');
+            }
+        });
+
+        // Helper function to replace textarea with div for capture
+        function replaceTextareaForCapture() {
+            const textarea = document.getElementById('findingsText');
+            const textareaStyle = window.getComputedStyle(textarea);
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.textContent = textarea.value;
+            tempDiv.style.cssText = `
+                font-family: ${textareaStyle.fontFamily};
+                font-size: ${textareaStyle.fontSize};
+                line-height: ${textareaStyle.lineHeight};
+                padding: ${textareaStyle.padding};
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                background: white;
+                width: 100%;
+                min-height: 260px;
+                margin: 0;
+                display: block;
+            `;
+            
+            textarea.style.display = 'none';
+            textarea.parentNode.insertBefore(tempDiv, textarea);
+            
+            return { textarea, tempDiv };
+        }
+
+        function restoreTextarea(textarea, tempDiv) {
+            textarea.style.display = '';
+            if (tempDiv && tempDiv.parentNode) {
+                tempDiv.remove();
+            }
+        }
+
+        buildFindings();
+
+        // Load prior
+        document.getElementById('editPriorBtn').addEventListener('click', function() {
+            currentReportId = null;
+            setSyncStatus('', 'Not saved');
+            investigations = [];
+            document.getElementById('patientName').value = 'Amina Hassan';
+            document.getElementById('patientAge').value = '32';
+            document.getElementById('clinicalIndication').value = 'Routine antenatal follow-up';
+            document.getElementById('signatureText').value = 'Dr. Khalid H. Beergeel';
+            document.getElementById('reportDate').value = '2026-06-24';
+            examType.value = 'second';
+            updateModules();
+            document.getElementById('gravidity').value = '3';
+            document.getElementById('parity').value = '2';
+            document.getElementById('lnmpDate').value = '2025-11-10';
+            document.getElementById('lnmpUnknown').checked = false;
+            updateGA();
+            document.getElementById('pregnancyType').value = 'single';
+            document.getElementById('presentation').value = 'cephalic';
+            document.getElementById('gaSecond').value = '28+3';
+            document.getElementById('fhr').value = 'Positive';
+            document.getElementById('placentaLocation').value = 'fundal';
+            document.getElementById('afiSdpValue').value = '5.2';
+            document.getElementById('flac').value = '70';
+            document.getElementById('efw').value = '2500 g';
+            document.getElementById('conclusionSecond').value = 'Normal 2nd trimester pregnancy.';
+            buildFindings();
+            if (!previewActive) {
+                document.getElementById('previewBtn').click();
+            }
+            if (typeof renderInvestigations === 'function') renderInvestigations();
+            if (typeof renderLabReport === 'function') renderLabReport();
+        });
+
+        // =========================================================
+        // SUPABASE SETUP
+        // =========================================================
+        const SUPABASE_URL = 'https://ysvdngjjhqemqudbdzob.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzdmRuZ2pqaHFlbXF1ZGJkem9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MTE5NTcsImV4cCI6MjA5ODM4Nzk1N30.48GMmoTsNiPj1h5U75OltrDECs1ru5iuBL_rBmHjtqQ';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentReportId = null; // set once the doctor saves, or once the lab tech loads a record
+        const syncStatus = document.getElementById('syncStatus');
+
+        function setSyncStatus(state, text) {
+            syncStatus.className = 'sync-status ' + state;
+            const icon = state === 'saved' ? 'fa-check-circle' : state === 'saving' ? 'fa-spinner fa-spin' : state === 'error' ? 'fa-exclamation-circle' : 'fa-cloud';
+            syncStatus.innerHTML = `<i class="fas ${icon}"></i> ${text}`;
+        }
+
+        // Collect every doctor-side field into one snapshot object,
+        // used both to save to Supabase and to restore the form later.
+        function collectFormSnapshot() {
+            const ids = ['reportDate','patientName','patientAge','patientId','lmpDisplay','clinicalIndication',
+                'referringDoctor','signatureText','signatureSign','findingsText','impressionText',
+                'gravidity','parity','lnmpDate','pregnancyType','presentation','gaSecond','gaBySecond','fhr',
+                'anomalies','placentaLocation','lowLyingCm','afiSdp','afiSdpValue','flac','efw','dopplerSelect',
+                'conclusionSecond','firstPregnancyType','gsFindings','gsDiameter','yolkSac','fetalPole','fhrFirst',
+                'gaBy','gaFirst','adnexaFirst','culdesacFirst','conclusionFirst','uterusText','endometriumText',
+                'cervixText','ovaryText','podText'];
+            const snapshot = { examType: examType.value };
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) snapshot[id] = el.type === 'checkbox' ? el.checked : el.value;
+            });
+            const lnmpU = document.getElementById('lnmpUnknown');
+            if (lnmpU) snapshot.lnmpUnknown = lnmpU.checked;
+            return snapshot;
+        }
+
+        function applyFormSnapshot(snapshot) {
+            if (!snapshot) return;
+            if (snapshot.examType) { examType.value = snapshot.examType; updateModules(); }
+            Object.keys(snapshot).forEach(id => {
+                const el = document.getElementById(id);
+                if (!el || id === 'examType') return;
+                if (el.type === 'checkbox') el.checked = !!snapshot[id];
+                else el.value = snapshot[id] ?? '';
+            });
+            updateGA();
+            buildFindings();
+        }
+
+        // SAVE TO CLOUD (doctor side) — upserts the reports row
+        document.getElementById('saveCloudBtn').addEventListener('click', async function() {
+            buildFindings();
+            setSyncStatus('saving', 'Saving...');
+            const snapshot = collectFormSnapshot();
+            const row = {
+                serial: document.getElementById('serialDisplay').textContent,
+                report_date: document.getElementById('reportDate').value || null,
+                patient_name: document.getElementById('patientName').value || null,
+                patient_age: document.getElementById('patientAge').value || null,
+                patient_id: document.getElementById('patientId').value || null,
+                lmp: document.getElementById('lmpDisplay').value || null,
+                clinical_indication: document.getElementById('clinicalIndication').value || null,
+                referring_doctor: document.getElementById('referringDoctor').value || null,
+                exam_type: examType.value,
+                findings: document.getElementById('findingsText').value || null,
+                impression: document.getElementById('impressionText').value || null,
+                signature_text: document.getElementById('signatureText').value || null,
+                signature_sign: document.getElementById('signatureSign').value || null,
+                form_data: snapshot
+            };
+
+            try {
+                let result;
+                if (currentReportId) {
+                    result = await supabaseClient.from('reports').update(row).eq('id', currentReportId).select().single();
+                } else {
+                    result = await supabaseClient.from('reports').insert(row).select().single();
+                }
+                if (result.error) throw result.error;
+                currentReportId = result.data.id;
+                setSyncStatus('saved', 'Saved to cloud');
+            } catch (err) {
+                console.error(err);
+                setSyncStatus('error', 'Save failed — check connection');
+                alert('Could not save to Supabase: ' + err.message);
+            }
+        });
+
+        // =========================================================
+        // ROLE SWITCHER (Doctor <-> Lab Technician)
+        // =========================================================
+        const roleDoctorBtn = document.getElementById('roleDoctorBtn');
+        const roleLabBtn = document.getElementById('roleLabBtn');
+        const doctorView = document.getElementById('doctorView');
+        const labPanel = document.getElementById('labPanel');
+
+        function setRole(role) {
+            if (role === 'lab') {
+                roleLabBtn.classList.add('active');
+                roleDoctorBtn.classList.remove('active');
+                labPanel.classList.remove('hidden-role');
+                doctorView.classList.add('hidden-role');
+            } else {
+                roleDoctorBtn.classList.add('active');
+                roleLabBtn.classList.remove('active');
+                labPanel.classList.add('hidden-role');
+                doctorView.classList.remove('hidden-role');
+            }
+        }
+        roleDoctorBtn.addEventListener('click', () => setRole('doctor'));
+        roleLabBtn.addEventListener('click', () => setRole('lab'));
+
+        // =========================================================
+        // LAB TECHNICIAN MODULE (Supabase-backed)
+        // =========================================================
+        let investigations = []; // { id (db uuid or temp), name, photos: [ {id, dataUrl/public_url, name, uploading} ] }
+        let invCounter = 0;
+        let pendingPhotoTargetId = null;
+
+        const investigationList = document.getElementById('investigationList');
+        const labEmptyHint = document.getElementById('labEmptyHint');
+        const hiddenPhotoInput = document.getElementById('hiddenPhotoInput');
+        const labPatientFound = document.getElementById('labPatientFound');
+        const labPatientFoundText = document.getElementById('labPatientFoundText');
+        const labSearchInput = document.getElementById('labSearchInput');
+        const labSearchBtn = document.getElementById('labSearchBtn');
+        const labSearchResults = document.getElementById('labSearchResults');
+
+        function showLinkBanner(state, text) {
+            labPatientFoundText.textContent = text;
+            labPatientFound.classList.add('show');
+            if (state === 'ok') {
+                labPatientFound.style.background = '#e9f6ee';
+                labPatientFound.style.borderColor = '#b9e4c6';
+                labPatientFound.style.color = '#1d6b3a';
+            } else {
+                labPatientFound.style.background = '#fdf3e3';
+                labPatientFound.style.borderColor = '#f0d9a6';
+                labPatientFound.style.color = '#8a6310';
+            }
+        }
+
+        // Search the cloud for matching reports by name or patient ID
+        async function searchCloudPatients() {
+            const q = labSearchInput.value.trim();
+            labSearchResults.innerHTML = '';
+            if (!q) return;
+
+            labSearchResults.innerHTML = '<div class="lab-search-empty"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+            try {
+                const { data, error } = await supabaseClient
+                    .from('reports')
+                    .select('id, patient_name, patient_id, report_date, exam_type, serial')
+                    .or(`patient_name.ilike.%${q}%,patient_id.ilike.%${q}%`)
+                    .order('created_at', { ascending: false })
+                    .limit(15);
+                if (error) throw error;
+
+                labSearchResults.innerHTML = '';
+                if (!data || data.length === 0) {
+                    labSearchResults.innerHTML = '<div class="lab-search-empty">No matching patient record found. Ask the doctor to save the report to the cloud first, or double-check the spelling.</div>';
+                    return;
+                }
+                data.forEach(rec => {
+                    const item = document.createElement('div');
+                    item.className = 'lab-search-result-item';
+                    item.innerHTML = `
+                        <div class="lsr-main">
+                            <span class="lsr-name">${rec.patient_name || '(no name)'}</span>
+                            <span class="lsr-meta">ID: ${rec.patient_id || '—'} · ${rec.exam_type || ''} · ${rec.report_date || ''} · Serial ${rec.serial || ''}</span>
+                        </div>
+                        <span class="lsr-select">Select <i class="fas fa-arrow-right"></i></span>
+                    `;
+                    item.addEventListener('click', () => loadPatientForLab(rec));
+                    labSearchResults.appendChild(item);
+                });
+            } catch (err) {
+                console.error(err);
+                labSearchResults.innerHTML = '<div class="lab-search-empty">Search failed — check your connection.</div>';
+            }
+        }
+        labSearchBtn.addEventListener('click', searchCloudPatients);
+        labSearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchCloudPatients(); });
+
+        // Load a selected patient's report into BOTH the doctor view (read-only context)
+        // and the lab tech's investigation list, pulling any investigations/photos
+        // already saved for this report from the cloud.
+        async function loadPatientForLab(rec) {
+            currentReportId = rec.id;
+            showLinkBanner('ok', `Linked to "${rec.patient_name || rec.patient_id}" — loading existing report...`);
+            labSearchResults.innerHTML = '';
+            labSearchInput.value = rec.patient_name || rec.patient_id || '';
+
+            try {
+                const { data: fullReport, error: reportErr } = await supabaseClient
+                    .from('reports').select('*').eq('id', rec.id).single();
+                if (reportErr) throw reportErr;
+
+                // Populate the doctor's report so the combined screenshot/PDF works
+                applyFormSnapshot(fullReport.form_data);
+                document.getElementById('patientId').value = fullReport.patient_id || '';
+                document.getElementById('patientName').value = fullReport.patient_name || '';
+                setSyncStatus('saved', 'Loaded from cloud');
+
+                // Pull investigations + photos for this report
+                const { data: invs, error: invErr } = await supabaseClient
+                    .from('investigations').select('id, name').eq('report_id', rec.id).order('created_at');
+                if (invErr) throw invErr;
+
+                investigations = [];
+                for (const inv of (invs || [])) {
+                    const { data: photos, error: photoErr } = await supabaseClient
+                        .from('lab_photos').select('id, public_url, file_name').eq('investigation_id', inv.id).order('created_at');
+                    if (photoErr) throw photoErr;
+                    investigations.push({
+                        id: inv.id,
+                        name: inv.name || '',
+                        photos: (photos || []).map(p => ({ id: p.id, dataUrl: p.public_url, name: p.file_name }))
+                    });
+                }
+                renderInvestigations();
+                renderLabReport();
+                showLinkBanner('ok', `Linked to "${fullReport.patient_name}" — ${investigations.length} investigation(s) loaded. Add or attach more below.`);
+            } catch (err) {
+                console.error(err);
+                showLinkBanner('warn', 'Could not fully load this record — check your connection and try again.');
+            }
+        }
+
+        function renderInvestigations() {
+            investigationList.innerHTML = '';
+            labEmptyHint.style.display = investigations.length === 0 ? 'block' : 'none';
+
+            investigations.forEach(inv => {
+                const item = document.createElement('div');
+                item.className = 'investigation-item';
+
+                const head = document.createElement('div');
+                head.className = 'investigation-item-head';
+
+                const nameInput = document.createElement('input');
+                nameInput.className = 'investigation-name-input';
+                nameInput.value = inv.name;
+                nameInput.placeholder = 'Investigation name (e.g. CBC, Urinalysis)';
+                nameInput.addEventListener('input', () => {
+                    inv.name = nameInput.value;
+                    renderLabReport();
+                });
+                nameInput.addEventListener('blur', () => saveInvestigationName(inv));
+
+                const actions = document.createElement('div');
+                actions.className = 'investigation-actions';
+
+                const uploadBtn = document.createElement('button');
+                uploadBtn.className = 'upload-btn';
+                uploadBtn.innerHTML = '<i class="fas fa-camera"></i> Attach Photo';
+                uploadBtn.addEventListener('click', async () => {
+                    if (!inv.id || String(inv.id).startsWith('temp')) {
+                        await saveInvestigationName(inv); // ensure it exists in DB before uploading
+                    }
+                    pendingPhotoTargetId = inv.id;
+                    hiddenPhotoInput.click();
+                });
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-inv-btn';
+                removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                removeBtn.addEventListener('click', async () => {
+                    investigations = investigations.filter(i => i.id !== inv.id);
+                    renderInvestigations();
+                    renderLabReport();
+                    if (inv.id && !String(inv.id).startsWith('temp')) {
+                        try { await supabaseClient.from('investigations').delete().eq('id', inv.id); }
+                        catch (err) { console.error(err); }
+                    }
+                });
+
+                actions.appendChild(uploadBtn);
+                actions.appendChild(removeBtn);
+                head.appendChild(nameInput);
+                head.appendChild(actions);
+                item.appendChild(head);
+
+                if (inv.photos.length > 0) {
+                    const strip = document.createElement('div');
+                    strip.className = 'inv-photos-strip';
+                    inv.photos.forEach((photo, idx) => {
+                        const thumb = document.createElement('div');
+                        thumb.className = 'inv-photo-thumb';
+                        const img = document.createElement('img');
+                        img.src = photo.dataUrl;
+                        const removePhotoBtn = document.createElement('button');
+                        removePhotoBtn.className = 'remove-photo';
+                        removePhotoBtn.innerHTML = '<i class="fas fa-times"></i>';
+                        removePhotoBtn.addEventListener('click', async () => {
+                            inv.photos.splice(idx, 1);
+                            renderInvestigations();
+                            renderLabReport();
+                            if (photo.id) {
+                                try { await supabaseClient.from('lab_photos').delete().eq('id', photo.id); }
+                                catch (err) { console.error(err); }
+                            }
+                        });
+                        thumb.appendChild(img);
+                        thumb.appendChild(removePhotoBtn);
+                        strip.appendChild(thumb);
+                    });
+                    item.appendChild(strip);
+                }
+
+                investigationList.appendChild(item);
+            });
+        }
+
+        // Creates (or updates) the investigation row in Supabase.
+        // Requires a linked report (currentReportId) — created when the doctor
+        // saves, or when the lab tech selects a patient from search.
+        async function saveInvestigationName(inv) {
+            if (!currentReportId) {
+                alert('Please search and select a patient record first (the doctor must save the report to the cloud before lab results can be attached).');
+                return;
+            }
+            try {
+                if (!inv.id || String(inv.id).startsWith('temp')) {
+                    const { data, error } = await supabaseClient
+                        .from('investigations')
+                        .insert({ report_id: currentReportId, name: inv.name || '' })
+                        .select().single();
+                    if (error) throw error;
+                    inv.id = data.id;
+                } else {
+                    const { error } = await supabaseClient
+                        .from('investigations')
+                        .update({ name: inv.name || '' })
+                        .eq('id', inv.id);
+                    if (error) throw error;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Could not save investigation: ' + err.message);
+            }
+        }
+
+        document.getElementById('addInvestigationBtn').addEventListener('click', () => {
+            invCounter++;
+            investigations.push({ id: 'temp' + invCounter, name: '', photos: [] });
+            renderInvestigations();
+            renderLabReport();
+        });
+
+        // Uploads each selected photo to Supabase Storage, then records it in lab_photos
+        hiddenPhotoInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files || []);
+            if (!files.length || !pendingPhotoTargetId) { hiddenPhotoInput.value = ''; return; }
+            const inv = investigations.find(i => i.id === pendingPhotoTargetId);
+            if (!inv) { hiddenPhotoInput.value = ''; return; }
+
+            for (const file of files) {
+                const localUrl = URL.createObjectURL(file);
+                const tempPhoto = { id: null, dataUrl: localUrl, name: file.name, uploading: true };
+                inv.photos.push(tempPhoto);
+                renderInvestigations();
+                renderLabReport();
+
+                try {
+                    const ext = file.name.split('.').pop() || 'jpg';
+                    const path = `${currentReportId}/${inv.id}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+                    const { error: uploadErr } = await supabaseClient.storage.from('lab-results').upload(path, file, { upsert: false });
+                    if (uploadErr) throw uploadErr;
+
+                    const { data: urlData } = supabaseClient.storage.from('lab-results').getPublicUrl(path);
+                    const publicUrl = urlData.publicUrl;
+
+                    const { data: row, error: rowErr } = await supabaseClient
+                        .from('lab_photos')
+                        .insert({ investigation_id: inv.id, report_id: currentReportId, storage_path: path, public_url: publicUrl, file_name: file.name })
+                        .select().single();
+                    if (rowErr) throw rowErr;
+
+                    tempPhoto.id = row.id;
+                    tempPhoto.dataUrl = publicUrl;
+                    tempPhoto.uploading = false;
+                } catch (err) {
+                    console.error(err);
+                    inv.photos = inv.photos.filter(p => p !== tempPhoto);
+                    alert('Photo upload failed: ' + err.message);
+                }
+                renderInvestigations();
+                renderLabReport();
+            }
+            hiddenPhotoInput.value = '';
+        });
+
+        // Build the lab results section that appears inside the printable report
+        const labReportSection = document.getElementById('labReportSection');
+        const labReportGrid = document.getElementById('labReportGrid');
+
+        function renderLabReport() {
+            labReportGrid.innerHTML = '';
+            const withPhotos = investigations.filter(i => i.photos.length > 0);
+
+            if (withPhotos.length === 0) {
+                // No lab results attached at all — hide the whole section.
+                // (Handles the case where the patient has no investigations.)
+                labReportSection.classList.remove('show');
+                return;
+            }
+
+            labReportSection.classList.add('show');
+            withPhotos.forEach(inv => {
+                inv.photos.forEach(photo => {
+                    const cell = document.createElement('div');
+                    cell.className = 'lab-report-item';
+                    const title = document.createElement('div');
+                    title.className = 'lab-report-title';
+                    title.textContent = inv.name || 'Investigation';
+                    const img = document.createElement('img');
+                    img.src = photo.dataUrl;
+                    img.crossOrigin = 'anonymous';
+                    cell.appendChild(title);
+                    cell.appendChild(img);
+                    labReportGrid.appendChild(cell);
+                });
+            });
+        }
+
+        // Handles the case where the patient has no ultrasound exam at all:
+        // if the doctor's findings/impression are both empty, hide the ultrasound
+        // boxes from the combined capture so only lab results show.
+        function toggleUltrasoundVisibilityForCapture(hide) {
+            const findingsBox = document.querySelector('.rp-findings-box');
+            const impressionBox = document.querySelector('.rp-impression-box');
+            const findingsVal = document.getElementById('findingsText').value.trim();
+            const impressionVal = document.getElementById('impressionText').value.trim();
+            const hasUltrasoundContent = findingsVal.length > 0 || impressionVal.length > 0;
+
+            if (hide && !hasUltrasoundContent) {
+                findingsBox.style.display = 'none';
+                impressionBox.style.display = 'none';
+                return true; // we hid them
+            }
+            findingsBox.style.display = '';
+            impressionBox.style.display = '';
+            return false;
+        }
+
+        // SCREENSHOT — captures ultrasound report + lab results together.
+        // If a patient has no ultrasound findings, that section is hidden automatically.
+        // If a patient has no lab results attached, that section stays hidden automatically.
+        document.getElementById('screenshotBtn').addEventListener('click', function() {
+            buildFindings();
+            renderLabReport();
+
+            const { textarea, tempDiv } = replaceTextareaForCapture();
+            const hidUltrasound = toggleUltrasoundVisibilityForCapture(true);
+
+            const element = document.getElementById('reportPaper');
+
+            element.classList.add('screenshot-flash');
+            setTimeout(() => {
+                element.classList.remove('screenshot-flash');
+            }, 600);
+
+            setTimeout(() => {
+                html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true,
+                    backgroundColor: '#ffffff',
+                    height: element.scrollHeight,
+                    width: element.scrollWidth,
+                    logging: false
+                }).then(canvas => {
+                    restoreTextarea(textarea, tempDiv);
+                    if (hidUltrasound) toggleUltrasoundVisibilityForCapture(false);
+                    const link = document.createElement('a');
+                    link.download = 'Beergeel_Combined_Report.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }).catch(err => {
+                    restoreTextarea(textarea, tempDiv);
+                    if (hidUltrasound) toggleUltrasoundVisibilityForCapture(false);
+                    alert('Error taking screenshot: ' + err.message);
+                });
+            }, 300);
+        });
+
+        // PDF — same combined capture logic as screenshot
+        document.getElementById('pdfBtn').addEventListener('click', function() {
+            if (previewActive) {
+                document.getElementById('previewBtn').click();
+            }
+            buildFindings();
+            renderLabReport();
+
+            const { textarea, tempDiv } = replaceTextareaForCapture();
+            const hidUltrasound = toggleUltrasoundVisibilityForCapture(true);
+
+            document.getElementById('appWrapper').classList.add('pdf-mode');
+            const element = document.getElementById('reportPaper');
+
+            setTimeout(() => {
+                html2pdf().set({
+                    margin: 0.4,
+                    filename: 'Beergeel_Combined_Report.pdf',
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        height: element.scrollHeight,
+                        width: element.scrollWidth,
+                        logging: false
+                    },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                }).from(element).save().then(() => {
+                    restoreTextarea(textarea, tempDiv);
+                    if (hidUltrasound) toggleUltrasoundVisibilityForCapture(false);
+                    document.getElementById('appWrapper').classList.remove('pdf-mode');
+                    autoResizeTextarea();
+                }).catch(err => {
+                    restoreTextarea(textarea, tempDiv);
+                    if (hidUltrasound) toggleUltrasoundVisibilityForCapture(false);
+                    document.getElementById('appWrapper').classList.remove('pdf-mode');
+                    alert('PDF generation error: ' + err.message);
+                });
+            }, 400);
+        });
+
+        renderInvestigations();
+        renderLabReport();
+    })();
+</script>
+</body>
+</html>
