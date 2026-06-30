@@ -130,6 +130,27 @@
             font-weight: 500;
             font-family: 'Segoe UI', sans-serif;
         }
+        .exam-type-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            align-items: center;
+        }
+        .no-us-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-left: auto;
+            background: #fdf3e3;
+            border: 1px solid #f0d9a6;
+            color: #8a6310 !important;
+            padding: 6px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600 !important;
+        }
+        .no-us-toggle input { cursor: pointer; }
         .badge {
             background: #dce7f7;
             padding: 3px 20px;
@@ -1056,6 +1077,7 @@
             <span class="sync-status" id="syncStatus"><i class="fas fa-cloud"></i> Not saved</span>
         </div>
         <div class="btn-group">
+            <button class="btn btn-success" id="newPatientBtn"><i class="fas fa-user-plus"></i> New Patient</button>
             <button class="btn btn-cloud" id="saveCloudBtn"><i class="fas fa-cloud-upload-alt"></i> Save to Cloud</button>
             <button class="btn" id="previewBtn"><i class="fas fa-eye"></i> Preview</button>
             <button class="btn btn-success" id="screenshotBtn"><i class="fas fa-camera"></i> Screenshot</button>
@@ -1108,13 +1130,16 @@
     <div id="doctorView">
     <div class="exam-selector">
         <label><i class="fas fa-stethoscope"></i> Examination Type</label>
-        <select id="examType">
-            <option value="pelvic">Pelvic Ultrasound</option>
-            <option value="first">Obstetric First Trimester</option>
-            <option value="second">Obstetric 2nd Trimester</option>
-            <option value="third">Obstetric 3rd Trimester</option>
-        </select>
-        <span class="badge" id="examTypeLabel">Pelvic</span>
+        <span class="exam-type-controls" id="examTypeControls">
+            <select id="examType">
+                <option value="pelvic">Pelvic Ultrasound</option>
+                <option value="first">Obstetric First Trimester</option>
+                <option value="second">Obstetric 2nd Trimester</option>
+                <option value="third">Obstetric 3rd Trimester</option>
+            </select>
+            <span class="badge" id="examTypeLabel">Pelvic</span>
+        </span>
+        <label class="no-us-toggle"><input type="checkbox" id="noUltrasound"><i class="fas fa-ban"></i> No Ultrasound (patient info only)</label>
     </div>
 
     <div class="g-p-lnmp hidden" id="obstetricFields">
@@ -1372,6 +1397,12 @@
         }
 
         function buildFindings() {
+            if (document.getElementById('noUltrasound').checked) {
+                findingsText.value = '';
+                impressionText.value = '';
+                autoResizeTextarea();
+                return;
+            }
             const val = examType.value;
             let findings = '';
             let impression = '';
@@ -1529,6 +1560,38 @@
         document.getElementById('anatomicScan').addEventListener('change', updateModules);
         updateModules();
 
+        // =========================================================
+        // NO ULTRASOUND MODE — patient has no scan today.
+        // Hides the exam-type selector and all ultrasound modules,
+        // clears findings/impression, and removes the findings/
+        // impression boxes from the report so only patient details
+        // (and, later, lab results) appear.
+        // =========================================================
+        const noUltrasoundCb = document.getElementById('noUltrasound');
+        const examTypeControls = document.getElementById('examTypeControls');
+        const findingsBoxEl = document.querySelector('.rp-findings-box');
+        const impressionBoxEl = document.querySelector('.rp-impression-box');
+
+        function setNoUltrasoundMode(active) {
+            examTypeControls.classList.toggle('hidden', active);
+            findingsBoxEl.style.display = active ? 'none' : '';
+            impressionBoxEl.style.display = active ? 'none' : '';
+            if (active) {
+                obstetricFields.classList.add('hidden');
+                pelvicMod.classList.add('hidden');
+                firstMod.classList.add('hidden');
+                secondMod.classList.add('hidden');
+                twinSec.classList.add('hidden');
+                bppSection.classList.add('hidden');
+                findingsText.value = '';
+                impressionText.value = '';
+                autoResizeTextarea();
+            } else {
+                updateModules(); // restores correct module set & rebuilds findings
+            }
+        }
+        noUltrasoundCb.addEventListener('change', () => setNoUltrasoundMode(noUltrasoundCb.checked));
+
         const lnmpDate = document.getElementById('lnmpDate');
         const lnmpUnknown = document.getElementById('lnmpUnknown');
         const gestAgeDisplay = document.getElementById('gestationalAgeDisplay');
@@ -1637,6 +1700,8 @@
             currentReportId = null;
             setSyncStatus('', 'Not saved');
             investigations = [];
+            document.getElementById('noUltrasound').checked = false;
+            setNoUltrasoundMode(false);
             document.getElementById('patientName').value = 'Amina Hassan';
             document.getElementById('patientAge').value = '32';
             document.getElementById('clinicalIndication').value = 'Routine antenatal follow-up';
@@ -1691,7 +1756,7 @@
                 'anomalies','placentaLocation','lowLyingCm','afiSdp','afiSdpValue','flac','efw','dopplerSelect',
                 'conclusionSecond','firstPregnancyType','gsFindings','gsDiameter','yolkSac','fetalPole','fhrFirst',
                 'gaBy','gaFirst','adnexaFirst','culdesacFirst','conclusionFirst','uterusText','endometriumText',
-                'cervixText','ovaryText','podText'];
+                'cervixText','ovaryText','podText','noUltrasound'];
             const snapshot = { examType: examType.value };
             ids.forEach(id => {
                 const el = document.getElementById(id);
@@ -1712,6 +1777,7 @@
                 else el.value = snapshot[id] ?? '';
             });
             updateGA();
+            setNoUltrasoundMode(noUltrasoundCb.checked); // also rebuilds findings when not active
             buildFindings();
         }
 
@@ -1729,7 +1795,7 @@
                 lmp: document.getElementById('lmpDisplay').value || null,
                 clinical_indication: document.getElementById('clinicalIndication').value || null,
                 referring_doctor: document.getElementById('referringDoctor').value || null,
-                exam_type: examType.value,
+                exam_type: noUltrasoundCb.checked ? 'none' : examType.value,
                 findings: document.getElementById('findingsText').value || null,
                 impression: document.getElementById('impressionText').value || null,
                 signature_text: document.getElementById('signatureText').value || null,
@@ -2193,6 +2259,59 @@
                     alert('PDF generation error: ' + err.message);
                 });
             }, 400);
+        });
+
+        // =========================================================
+        // NEW PATIENT — clears the whole form (doctor + lab side) so
+        // the doctor can start a fresh record from scratch.
+        // =========================================================
+        document.getElementById('newPatientBtn').addEventListener('click', function() {
+            if (!confirm('Start a new patient record? Any unsaved changes will be cleared.')) return;
+
+            currentReportId = null;
+            setSyncStatus('', 'Not saved');
+            investigations = [];
+            invCounter = 0;
+            pendingPhotoTargetId = null;
+
+            // Reset every doctor-side input/textarea to its original HTML default,
+            // and every select to its first (default) option.
+            document.querySelectorAll('#doctorView input[type="text"], #doctorView input[type="number"], #doctorView input[type="date"], #doctorView textarea').forEach(el => {
+                el.value = el.defaultValue;
+            });
+            document.querySelectorAll('#doctorView input[type="checkbox"]').forEach(el => {
+                el.checked = el.defaultChecked;
+            });
+            document.querySelectorAll('#doctorView select').forEach(el => {
+                el.selectedIndex = 0;
+            });
+
+            // Patient-identifying fields and the date/serial should be blank/fresh,
+            // not whatever the previous patient happened to leave behind.
+            document.getElementById('patientName').value = '';
+            document.getElementById('patientAge').value = '';
+            document.getElementById('patientId').value = '';
+            document.getElementById('referringDoctor').value = '';
+            document.getElementById('clinicalIndication').value = '';
+            document.getElementById('signatureSign').value = '';
+            document.getElementById('lmpDisplay').value = '';
+            document.getElementById('reportDate').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('serialDisplay').textContent = generateSerial();
+
+            examType.value = 'pelvic';
+            setNoUltrasoundMode(false); // also re-shows modules & rebuilds findings
+            updateGA();
+            calcBPP();
+
+            renderInvestigations();
+            renderLabReport();
+
+            labSearchInput.value = '';
+            labSearchResults.innerHTML = '';
+            labPatientFound.classList.remove('show');
+
+            if (previewActive) document.getElementById('previewBtn').click();
+            setRole('doctor');
         });
 
         renderInvestigations();
